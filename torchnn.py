@@ -9,7 +9,6 @@ from torchvision.transforms import ToTensor, Grayscale, Resize
 from collections import Counter
 import tessract
 import cv2
-import numpy as np
 
 
 # 1,28,28 - classes 0-9
@@ -33,9 +32,11 @@ class ImageClassifier(nn.Module):
         return self.model(x)
 
 
-
 def recog_nums(input_img):
-
+    """
+    :param input_img: numpy array with image
+    :return: counted numbers from image, Counter
+    """
     clf = ImageClassifier().to('cuda')
 
     with open('model_state_cuda_128_1.pt', 'rb') as f:
@@ -47,7 +48,6 @@ def recog_nums(input_img):
     rois = tessract.thresh_callback(thresh, src_gray)
     list_nums = []
     for roi in rois:
-
         roi = Image.fromarray(roi)
         img = Grayscale(1)(roi)
         img = Resize((28, 28))(img)
@@ -87,8 +87,8 @@ if __name__ == "__main__":
     #     print(f"Epoch:{epoch} loss is {loss.item()}")
     #     if loss.item() < 1e-5:
     #         break
-
-    # with open('model_state_cuda_128_1.pt', 'wb') as f:
+    #
+    # with open('model_state_cuda_128_2.pt', 'wb') as f:
     #     save(clf.state_dict(), f)
 
     with open('model_state_cuda_128_1.pt', 'rb') as f:

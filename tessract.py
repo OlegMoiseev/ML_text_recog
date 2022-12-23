@@ -2,6 +2,12 @@ import cv2
 
 
 def thresh_callback(val, src_gray):
+    """
+    Detecting ROIs with numbers (contours)
+    :param val: threshold value, use 255 as default
+    :param src_gray: source image from user
+    :return: splitted image to ROIs in list
+    """
     threshold = val
     canny_output = cv2.Canny(src_gray, threshold, threshold * 2)
     contours, _ = cv2.findContours(canny_output, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)

@@ -12,6 +12,10 @@ bot = telebot.TeleBot(token)
 
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
+    """
+    Handler of text messages to bot
+    :param message: message from API
+    """
     if message.text == "Привет":
         bot.send_message(message.from_user.id, "Привет, чем я могу тебе помочь?")
     elif message.text == "/help":
@@ -25,6 +29,10 @@ def get_text_messages(message):
 
 @bot.message_handler(func=lambda m: True, content_types=['photo'])
 def get_broadcast_picture(message):
+    """
+    Hadler picture-messages
+    :param message: message from API
+    """
     file_path = bot.get_file(message.photo[-1].file_id).file_path
     file = bot.download_file(file_path)
 
