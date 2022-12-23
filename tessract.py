@@ -34,25 +34,28 @@ def thresh_callback(val):
 
     print(bounds)
     print(bounds[0][0], bounds[0][1], bounds[0][2], bounds[0][3])  # x1, y1, x2, y2
-    roi = src_gray[bounds[0][1]:bounds[0][3], bounds[0][0]:bounds[0][2]]  # y1:y2, x1:x2
-    cv2.imwrite("roi1.jpg", roi)
-    cv2.imshow('Contours', drawing)
+
+    for i in range(len(bounds)):
+        roi = src_gray[bounds[i][1]:bounds[i][3], bounds[i][0]:bounds[i][2]]  # y1:y2, x1:x2
+        cv2.imwrite("data_num_recog/roi/roi{0}.jpg".format(i), roi)
+    # cv2.imshow('Contours', drawing)
 
 
-src = cv2.imread('data_num_recog/img_100.jpg')
-# src = cv2.resize(src, (600, 360))
+if __name__ == "__main__":
+    src = cv2.imread('data_num_recog/img_100.jpg')
+    # src = cv2.resize(src, (600, 360))
 
-# Convert image to gray and blur it
-src_gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
-src_gray = cv2.blur(src_gray, (3, 3))
+    # Convert image to gray and blur it
+    src_gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
+    src_gray = cv2.blur(src_gray, (3, 3))
 
 
-thresh = 100 # initial threshold
-thresh_callback(thresh)
+    thresh = 100  # initial threshold
+    thresh_callback(thresh)
 
-# Create Window
-source_window = 'Source'
-cv2.namedWindow(source_window)
-cv2.imshow(source_window, src_gray)
+    # Create Window
+    source_window = 'Source'
+    cv2.namedWindow(source_window)
+    cv2.imshow(source_window, src_gray)
 
-cv2.waitKey()
+    cv2.waitKey()

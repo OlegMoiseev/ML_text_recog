@@ -42,32 +42,35 @@ loss_fn = nn.CrossEntropyLoss()
 
 # Training flow 
 if __name__ == "__main__":
-    for epoch in range(10):  # train for 10 epochs
-        for batch in dataset:
-            X, y = batch
-            X, y = X.to('cuda'), y.to('cuda')
-            yhat = clf(X)
-            loss = loss_fn(yhat, y)
-
-            # Apply backprop
-            opt.zero_grad()
-            loss.backward()
-            opt.step()
-
-        print(f"Epoch:{epoch} loss is {loss.item()}")
-        if loss.item() < 1e-5:
-            break
-
-    with open('model_state_cuda.pt', 'wb') as f:
-        save(clf.state_dict(), f)
-
-    # with open('model_state_cuda.pt', 'rb') as f:
-    #     clf.load_state_dict(load(f))
+    # for epoch in range(10):  # train for 10 epochs
+    #     for batch in dataset:
+    #         X, y = batch
+    #         X, y = X.to('cuda'), y.to('cuda')
+    #         yhat = clf(X)
+    #         loss = loss_fn(yhat, y)
     #
+    #         # Apply backprop
+    #         opt.zero_grad()
+    #         loss.backward()
+    #         opt.step()
+    #
+    #     print(f"Epoch:{epoch} loss is {loss.item()}")
+    #     if loss.item() < 1e-5:
+    #         break
+    #
+    # with open('model_state_cuda.pt', 'wb') as f:
+    #     save(clf.state_dict(), f)
+
+    with open('model_state.pt', 'rb') as f:
+        clf.load_state_dict(load(f))
+
     # img = Image.open('data_num_recog/img_6.jpg')
-    # img = Grayscale(1)(img)
-    # img = Resize((28, 28))(img)
-    # # img_gray = Grayscale(1)(img)
-    # # img_tensor = pil_to_tensor(img_gray).unsqueeze(0)
-    # img_tensor = ToTensor()(img).unsqueeze(0).to('cuda')
-    # print(torch.argmax(clf(img_tensor)))
+    for i in range(16):
+        img = Image.open('data_num_recog/roi/roi{0}.jpg'.format(i))
+        # img = Grayscale(1)(img)
+        img = Resize((28, 28))(img)
+        # img.show()
+        # img_gray = Grayscale(1)(img)
+        # img_tensor = pil_to_tensor(img_gray).unsqueeze(0)
+        img_tensor = ToTensor()(img).unsqueeze(0).to('cuda')
+        print("roi" + str(i) + '.jpg: ' + str(torch.argmax(clf(img_tensor))))
