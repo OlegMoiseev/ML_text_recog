@@ -33,11 +33,12 @@ class ImageClassifier(nn.Module):
         return self.model(x)
 
 
+
 def recog_nums(input_img):
 
     clf = ImageClassifier().to('cuda')
 
-    with open('model_state_cuda.pt', 'rb') as f:
+    with open('model_state_cuda_128_1.pt', 'rb') as f:
         clf.load_state_dict(load(f))
 
     src_gray = cv2.blur(input_img, (3, 3))
@@ -64,7 +65,7 @@ def recog_nums(input_img):
 if __name__ == "__main__":
     # Get data
     train = datasets.MNIST(root="data_num_recog", download=False, train=True, transform=ToTensor())
-    dataset = DataLoader(train, 32)
+    dataset = DataLoader(train, 128)
 
     # Instance of the neural network, loss, optimizer
     clf = ImageClassifier().to('cuda')
@@ -86,26 +87,23 @@ if __name__ == "__main__":
     #     print(f"Epoch:{epoch} loss is {loss.item()}")
     #     if loss.item() < 1e-5:
     #         break
-    #
-    # with open('model_state_cuda.pt', 'wb') as f:
+
+    # with open('model_state_cuda_128_1.pt', 'wb') as f:
     #     save(clf.state_dict(), f)
 
-    # with open('model_state_cuda.pt', 'rb') as f:
-    #     clf.load_state_dict(load(f))
-    #
-    # # img = Image.open('data_num_recog/img_6.jpg')
-    # list_nums = []
-    # for i in range(17):
-    #     img = Image.open('data_num_recog/roi/roi{0}.jpg'.format(i))
-    #     img = Grayscale(1)(img)
-    #     img = Resize((28, 28))(img)
-    #     # img.show()
-    #     # img_tensor = pil_to_tensor(img_gray).unsqueeze(0)
-    #     img_tensor = ToTensor()(img).unsqueeze(0).to('cuda')
-    #     torched = torch.argmax(clf(img_tensor)).item()
-    #     list_nums.append(torched)
-    #     print("roi" + str(i) + '.jpg: ' + str(torched))
-    # counted_nums = Counter(list_nums)
-    # print(counted_nums)
-    src = cv2.imread('data_num_recog/tg_messages/23_12_2022_16_36_27.jpg')
-    recog_nums(src)
+    with open('model_state_cuda_128_1.pt', 'rb') as f:
+        clf.load_state_dict(load(f))
+
+    list_nums = []
+    for i in range(17):
+        img = Image.open('data_num_recog/roi/roi{0}.jpg'.format(i))
+        img = Grayscale(1)(img)
+        img = Resize((28, 28))(img)
+        # img.show()
+        # img_tensor = pil_to_tensor(img_gray).unsqueeze(0)
+        img_tensor = ToTensor()(img).unsqueeze(0).to('cuda')
+        torched = torch.argmax(clf(img_tensor)).item()
+        list_nums.append(torched)
+        print("roi" + str(i) + '.jpg: ' + str(torched))
+    counted_nums = Counter(list_nums)
+    print(counted_nums)
