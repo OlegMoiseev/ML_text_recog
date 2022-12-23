@@ -7,9 +7,12 @@ from torch.utils.data import DataLoader
 from torchvision import datasets
 from torchvision.transforms import ToTensor, Grayscale, Resize
 from torchvision.transforms.functional import pil_to_tensor
+from collections import Counter
+import tessract
+import cv2
+import numpy as np
 
-
-# Get data 
+# Get data
 train = datasets.MNIST(root="data_num_recog", download=False, train=True, transform=ToTensor())
 dataset = DataLoader(train, 32)
 
@@ -40,6 +43,38 @@ clf = ImageClassifier().to('cuda')
 opt = Adam(clf.parameters(), lr=1e-3)
 loss_fn = nn.CrossEntropyLoss()
 
+
+def recog_nums(input_img):
+    clf = ImageClassifier().to('cuda')
+    opt = Adam(clf.parameters(), lr=1e-3)
+    loss_fn = nn.CrossEntropyLoss()
+
+    # Convert image to gray and blur it
+    # src_gray = cv2.imdecode(np.frombuffer(input_img, np.uint8), -1)
+
+    # Convert image to gray and blur it
+    # src_gray = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
+    src_gray = cv2.blur(input_img, (3, 3))
+
+
+    thresh = 255  # initial threshold
+    rois = tessract.thresh_callback(thresh, src_gray)
+    list_nums = []
+    for roi in rois:
+        # img = Image.open('data_num_recog/roi/roi{0}.jpg'.format(i))
+        roi = Image.fromarray(roi)
+        img = Grayscale(1)(roi)
+        img = Resize((28, 28))(img)
+        # img.show()
+        # img_tensor = pil_to_tensor(img_gray).unsqueeze(0)
+        img_tensor = ToTensor()(img).unsqueeze(0).to('cuda')
+        torched = torch.argmax(clf(img_tensor)).item()
+        list_nums.append(torched)
+
+    counted_nums = Counter(list_nums)
+    print(counted_nums)
+
+
 # Training flow 
 if __name__ == "__main__":
     # for epoch in range(10):  # train for 10 epochs
@@ -61,16 +96,22 @@ if __name__ == "__main__":
     # with open('model_state_cuda.pt', 'wb') as f:
     #     save(clf.state_dict(), f)
 
-    with open('model_state.pt', 'rb') as f:
-        clf.load_state_dict(load(f))
-
-    # img = Image.open('data_num_recog/img_6.jpg')
-    for i in range(16):
-        img = Image.open('data_num_recog/roi/roi{0}.jpg'.format(i))
-        # img = Grayscale(1)(img)
-        img = Resize((28, 28))(img)
-        # img.show()
-        # img_gray = Grayscale(1)(img)
-        # img_tensor = pil_to_tensor(img_gray).unsqueeze(0)
-        img_tensor = ToTensor()(img).unsqueeze(0).to('cuda')
-        print("roi" + str(i) + '.jpg: ' + str(torch.argmax(clf(img_tensor))))
+    # with open('model_state_cuda.pt', 'rb') as f:
+    #     clf.load_state_dict(load(f))
+    #
+    # # img = Image.open('data_num_recog/img_6.jpg')
+    # list_nums = []
+    # for i in range(17):
+    #     img = Image.open('data_num_recog/roi/roi{0}.jpg'.format(i))
+    #     img = Grayscale(1)(img)
+    #     img = Resize((28, 28))(img)
+    #     # img.show()
+    #     # img_tensor = pil_to_tensor(img_gray).unsqueeze(0)
+    #     img_tensor = ToTensor()(img).unsqueeze(0).to('cuda')
+    #     torched = torch.argmax(clf(img_tensor)).item()
+    #     list_nums.append(torched)
+    #     print("roi" + str(i) + '.jpg: ' + str(torched))
+    # counted_nums = Counter(list_nums)
+    # print(counted_nums)
+    src = cv2.imread('data_num_recog/tg_messages/23_12_2022_16_36_27.jpg')
+    recog_nums(src)

@@ -1,5 +1,8 @@
 import telebot
 from datetime import datetime
+import tessract
+import cv2
+import numpy as np
 
 
 with open('data_num_recog/token', 'r') as f:
@@ -23,11 +26,22 @@ def get_broadcast_picture(message):
     file_path = bot.get_file(message.photo[-1].file_id).file_path
     file = bot.download_file(file_path)
 
-    now = datetime.now()
-    filepath = "data_num_recog/tg_messages/" + now.strftime("%d_%m_%Y_%H_%M_%S.png")
+    # Convert image to gray and blur it
+    src_gray = cv2.imdecode(np.frombuffer(file, np.uint8), -1)
 
-    with open(filepath, "wb") as code:
-        code.write(file)
+    # src_gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
+    # src_gray = cv2.blur(src_gray, (3, 3))
+
+    now = datetime.now()
+    filepath = "data_num_recog/tg_messages/" + now.strftime("%d_%m_%Y_%H_%M_%S.jpg")
+    cv2.imwrite(filepath, src_gray)
+
+
+    thresh = 255  # initial threshold
+    tessract.thresh_callback(thresh, src_gray)
+
+    recog_nums()
+
 
 
 bot.polling(none_stop=True, interval=0)

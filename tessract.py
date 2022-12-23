@@ -4,7 +4,7 @@ import numpy as np
 # C:\Program Files\Tesseract-OCR
 
 
-def thresh_callback(val):
+def thresh_callback(val, src_gray):
     threshold = val
 
     canny_output = cv2.Canny(src_gray, threshold, threshold * 2)
@@ -32,13 +32,16 @@ def thresh_callback(val):
         cv2.rectangle(drawing, (int(boundRect[i][0] - additional_bound), int(boundRect[i][1] - additional_bound)),  # left, up
                       (int(boundRect[i][0] + boundRect[i][2]) + additional_bound, int(boundRect[i][1] + boundRect[i][3]) + additional_bound), color, 2)
 
-    print(bounds)
-    print(bounds[0][0], bounds[0][1], bounds[0][2], bounds[0][3])  # x1, y1, x2, y2
+    # print(bounds)
+    # print(bounds[0][0], bounds[0][1], bounds[0][2], bounds[0][3])  # x1, y1, x2, y2
 
+    roi_ret = []
+    # for i in range(len(bounds)):
+    #     roi = src_gray[bounds[i][1]:bounds[i][3], bounds[i][0]:bounds[i][2]]  # y1:y2, x1:x2
+    #     cv2.imwrite("data_num_recog/roi/roi{0}.jpg".format(i), roi)
     for i in range(len(bounds)):
-        roi = src_gray[bounds[i][1]:bounds[i][3], bounds[i][0]:bounds[i][2]]  # y1:y2, x1:x2
-        cv2.imwrite("data_num_recog/roi/roi{0}.jpg".format(i), roi)
-    # cv2.imshow('Contours', drawing)
+        roi_ret.append(src_gray[bounds[i][1]:bounds[i][3], bounds[i][0]:bounds[i][2]])  # y1:y2, x1:x2
+    return roi_ret
 
 
 if __name__ == "__main__":
