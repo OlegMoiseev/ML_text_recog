@@ -12,9 +12,6 @@ import tessract
 import cv2
 import numpy as np
 
-# Get data
-train = datasets.MNIST(root="data_num_recog", download=False, train=True, transform=ToTensor())
-dataset = DataLoader(train, 32)
 
 
 # 1,28,28 - classes 0-9
@@ -38,16 +35,17 @@ class ImageClassifier(nn.Module):
         return self.model(x)
 
 
-# Instance of the neural network, loss, optimizer
-clf = ImageClassifier().to('cuda')
-opt = Adam(clf.parameters(), lr=1e-3)
-loss_fn = nn.CrossEntropyLoss()
+
 
 
 def recog_nums(input_img):
+
     clf = ImageClassifier().to('cuda')
     opt = Adam(clf.parameters(), lr=1e-3)
     loss_fn = nn.CrossEntropyLoss()
+
+    with open('model_state_cuda.pt', 'rb') as f:
+        clf.load_state_dict(load(f))
 
     # Convert image to gray and blur it
     # src_gray = cv2.imdecode(np.frombuffer(input_img, np.uint8), -1)
@@ -72,11 +70,21 @@ def recog_nums(input_img):
         list_nums.append(torched)
 
     counted_nums = Counter(list_nums)
-    print(counted_nums)
+    # print(counted_nums)
+    return counted_nums
 
 
 # Training flow 
 if __name__ == "__main__":
+    # Get data
+    train = datasets.MNIST(root="data_num_recog", download=False, train=True, transform=ToTensor())
+    dataset = DataLoader(train, 32)
+
+    # Instance of the neural network, loss, optimizer
+    clf = ImageClassifier().to('cuda')
+    opt = Adam(clf.parameters(), lr=1e-3)
+    loss_fn = nn.CrossEntropyLoss()
+
     # for epoch in range(10):  # train for 10 epochs
     #     for batch in dataset:
     #         X, y = batch

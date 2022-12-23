@@ -1,6 +1,5 @@
 import telebot
-from datetime import datetime
-import tessract
+import torchnn
 import cv2
 import numpy as np
 
@@ -29,19 +28,15 @@ def get_broadcast_picture(message):
     # Convert image to gray and blur it
     src_gray = cv2.imdecode(np.frombuffer(file, np.uint8), -1)
 
-    # src_gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
-    # src_gray = cv2.blur(src_gray, (3, 3))
-
-    now = datetime.now()
-    filepath = "data_num_recog/tg_messages/" + now.strftime("%d_%m_%Y_%H_%M_%S.jpg")
-    cv2.imwrite(filepath, src_gray)
-
-
-    thresh = 255  # initial threshold
-    tessract.thresh_callback(thresh, src_gray)
-
-    recog_nums()
-
+    res = torchnn.recog_nums(src_gray)
+    print(res)
+    if len(res.most_common()) == 0:
+        bot.send_message(message.from_user.id, "There is null image, without any symbols")
+    else:
+        answer_str = ""
+        for value, count in res.most_common():
+            answer_str = answer_str + 'Value ' + str(value) + ': ' + str(count) + ' times\n'
+        bot.send_message(message.from_user.id, answer_str)
 
 
 bot.polling(none_stop=True, interval=0)
