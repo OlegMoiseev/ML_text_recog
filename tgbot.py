@@ -15,7 +15,10 @@ def get_text_messages(message):
     if message.text == "Привет":
         bot.send_message(message.from_user.id, "Привет, чем я могу тебе помочь?")
     elif message.text == "/help":
-        bot.send_message(message.from_user.id, "Напиши привет")
+        bot.send_message(message.from_user.id, "Hello, user! This Bot designed to recognise and count hand-written numbers. For example, you need to send such image:")
+        bot.send_photo(message.from_user.id, photo=open('data_num_recog/example.jpg', 'rb'))
+        bot.send_message(message.from_user.id, "After it, you will receive statistics of it")
+
     else:
         bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /help.")
 
@@ -30,6 +33,7 @@ def get_broadcast_picture(message):
 
     res = torchnn.recog_nums(src_gray)
     print(res)
+
     if len(res.most_common()) == 0:
         bot.send_message(message.from_user.id, "There is null image, without any symbols")
     else:

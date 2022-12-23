@@ -6,12 +6,10 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torchvision import datasets
 from torchvision.transforms import ToTensor, Grayscale, Resize
-from torchvision.transforms.functional import pil_to_tensor
 from collections import Counter
 import tessract
 import cv2
 import numpy as np
-
 
 
 # 1,28,28 - classes 0-9
@@ -35,42 +33,30 @@ class ImageClassifier(nn.Module):
         return self.model(x)
 
 
-
-
-
 def recog_nums(input_img):
 
     clf = ImageClassifier().to('cuda')
-    opt = Adam(clf.parameters(), lr=1e-3)
-    loss_fn = nn.CrossEntropyLoss()
 
     with open('model_state_cuda.pt', 'rb') as f:
         clf.load_state_dict(load(f))
 
-    # Convert image to gray and blur it
-    # src_gray = cv2.imdecode(np.frombuffer(input_img, np.uint8), -1)
-
-    # Convert image to gray and blur it
-    # src_gray = cv2.cvtColor(input_img, cv2.COLOR_BGR2GRAY)
     src_gray = cv2.blur(input_img, (3, 3))
-
 
     thresh = 255  # initial threshold
     rois = tessract.thresh_callback(thresh, src_gray)
     list_nums = []
     for roi in rois:
-        # img = Image.open('data_num_recog/roi/roi{0}.jpg'.format(i))
+
         roi = Image.fromarray(roi)
         img = Grayscale(1)(roi)
         img = Resize((28, 28))(img)
-        # img.show()
-        # img_tensor = pil_to_tensor(img_gray).unsqueeze(0)
+
         img_tensor = ToTensor()(img).unsqueeze(0).to('cuda')
         torched = torch.argmax(clf(img_tensor)).item()
         list_nums.append(torched)
 
     counted_nums = Counter(list_nums)
-    # print(counted_nums)
+
     return counted_nums
 
 
