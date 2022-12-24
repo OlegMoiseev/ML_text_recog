@@ -17,15 +17,28 @@ import cv2
 class ImageClassifier(nn.Module):
     def __init__(self):
         super().__init__()
+        # self.model = nn.Sequential(
+        #     nn.Conv2d(1, 32, (3, 3)),
+        #     nn.ReLU(),
+        #     nn.Conv2d(32, 64, (3, 3)),
+        #     nn.ReLU(),
+        #     nn.Conv2d(64, 64, (3, 3)),
+        #     nn.ReLU(),
+        #     nn.Flatten(),
+        #     nn.Linear(64 * (28 - 6) * (28 - 6), 10)
+        # )
+
         self.model = nn.Sequential(
             nn.Conv2d(1, 32, (3, 3)),
             nn.ReLU(),
             nn.Conv2d(32, 64, (3, 3)),
             nn.ReLU(),
-            nn.Conv2d(64, 64, (3, 3)),
+            nn.Conv2d(64, 128, (3, 3)),
+            nn.ReLU(),
+            nn.Conv2d(128, 128, (3, 3)),
             nn.ReLU(),
             nn.Flatten(),
-            nn.Linear(64 * (28 - 6) * (28 - 6), 10)
+            nn.Linear(128 * (28 - 8) * (28 - 8), 10)
         )
 
     def forward(self, x):
@@ -39,7 +52,7 @@ def recog_nums(input_img):
     """
     clf = ImageClassifier().to('cuda')
 
-    with open('model_state_cuda_128_1.pt', 'rb') as f:
+    with open('model_state_cuda_4_1.pt', 'rb') as f:
         clf.load_state_dict(load(f))
 
     src_gray = cv2.blur(input_img, (3, 3))
@@ -64,14 +77,14 @@ def recog_nums(input_img):
 # Training flow 
 if __name__ == "__main__":
     # Get data
-    train = datasets.MNIST(root="data_num_recog", download=False, train=True, transform=ToTensor())
-    dataset = DataLoader(train, 128)
-
+    # train = datasets.MNIST(root="data_num_recog", download=True, train=True, transform=ToTensor())
+    # dataset = DataLoader(train, 50)
+    #
     # Instance of the neural network, loss, optimizer
     clf = ImageClassifier().to('cuda')
     opt = Adam(clf.parameters(), lr=1e-3)
     loss_fn = nn.CrossEntropyLoss()
-
+    #
     # for epoch in range(10):  # train for 10 epochs
     #     for batch in dataset:
     #         X, y = batch
@@ -85,13 +98,13 @@ if __name__ == "__main__":
     #         opt.step()
     #
     #     print(f"Epoch:{epoch} loss is {loss.item()}")
-    #     if loss.item() < 1e-5:
-    #         break
+    #     # if loss.item() < 1e-5:
+    #     #     break
     #
-    # with open('model_state_cuda_128_2.pt', 'wb') as f:
+    # with open('model_state_cuda_4_1.pt', 'wb') as f:
     #     save(clf.state_dict(), f)
 
-    with open('model_state_cuda_128_1.pt', 'rb') as f:
+    with open('model_state_cuda_4_1.pt', 'rb') as f:
         clf.load_state_dict(load(f))
 
     list_nums = []
